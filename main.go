@@ -8,16 +8,30 @@ import (
 )
 
 func main() {
-	scanner := bufio.NewScanner(os.Stdin)
+	scanner := bufio.NewScanner(os.Stdin)	//Creates scanner for text input
 	for {
 		fmt.Print("Pokedex > ")
 		scanner.Scan()
-		userInput := cleanInput(scanner.Text())
-		fmt.Printf("Your command was: %s\n", userInput[0])
+		userInput := cleanInput(scanner.Text())	//Gets user input text
+		if len(userInput) == 0 {
+			continue
+		}
+		command, ok := commandRegistry[userInput[0]]	//Searches registry for command
+		if !ok {
+			fmt.Println("Unknown command")
+			continue
+		} else {
+			err := command.callback()	//Executes command from registry
+			if err != nil {
+				fmt.Printf("Returned error: %v", err)
+				continue
+			}
+		}
+		
 	}
 }
 
-func cleanInput(s string) []string {
+func cleanInput(s string) []string {	//Cleans user input string and returns first word in a lowercase state
 	lowerS := strings.ToLower(s)
 	results := strings.Fields(lowerS)
 	return results
