@@ -39,10 +39,8 @@ func (c *Client) GetLocationAreas(cache *pokecache.Cache, pageURL *string) (Conf
 	}
 
 	var areaResults ConfigData
-	fmt.Println("checking cache for:", url)
 	cachedData := checkCache(cache, url)	//Checks cache for data before requesting
 	if cachedData != nil {
-		fmt.Println("cache hit for:", url)
 		err := json.Unmarshal(cachedData, &areaResults)
 		if err != nil {
 			return ConfigData{}, fmt.Errorf("error unmarshaling json data: %w", err)
