@@ -1,10 +1,11 @@
-package api_commands
+package pokeapi
 
 import (
 	"fmt"
 	"net/http"
 	"encoding/json"
 	"time"
+	"github.com/jms-guy/internal/pokecache"
 )
 
 type Client struct {
@@ -12,7 +13,7 @@ type Client struct {
 	baseURL		string
 }
 
-type locationAreaResponse struct {
+type ConfigData struct {
 	Count		int		`json:"count"`
 	Next		*string	`json:"next"`
 	Previous	*string	`json:"previous"`
@@ -31,7 +32,7 @@ func NewClient() *Client {
 	}
 }
 
-func (c *Client) GetLocationAreas(pageURL *string) (locationAreaResponse, error) {
+func (c *Client) GetLocationAreas(pageURL *string) (ConfigData, error) {
 	url := c.baseURL + "/location-area"
 	if pageURL != nil {
 		url = *pageURL
@@ -39,19 +40,19 @@ func (c *Client) GetLocationAreas(pageURL *string) (locationAreaResponse, error)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return locationAreaResponse{}, fmt.Errorf("error making request: %w", err)
+		return ConfigData{}, fmt.Errorf("error making request: %w", err)
 	}
 
 	res, err := c.httpClient.Do(req)
 	if err != nil {
-		return locationAreaResponse{}, fmt.Errorf("error requesting data: %w", err)
+		return ConfigData{}, fmt.Errorf("error requesting data: %w", err)
 	}
 	defer res.Body.Close()
 
-	var areaResults locationAreaResponse
+	var areaResults ConfigData
 	decoder := json.NewDecoder(res.Body)
 	if err = decoder.Decode(&areaResults); err != nil {
-		return locationAreaResponse{}, fmt.Errorf("error decoding json data: %w", err)
+		return ConfigData{}, fmt.Errorf("error decoding json data: %w", err)
 	}
 	return areaResults, nil
 }

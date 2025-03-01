@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
 	"bufio"
 	"os"
 	"github.com/jms-guy/pokedexproject/internal/pokeapi"
@@ -10,6 +9,7 @@ import (
 
 func main() {
 	client := pokeapi.NewClient()		//Creating http client
+	configData := pokeapi.ConfigData{}	//Creating base ConfigData struct for json data
 	scanner := bufio.NewScanner(os.Stdin)	//Creates scanner for text input
 	for {
 		fmt.Print("Pokedex > ")
@@ -23,7 +23,7 @@ func main() {
 			fmt.Println("Unknown command")
 			continue
 		} else {
-			err := command.callback()	//Executes command from registry
+			err := command.callback(client, &configData)	//Executes command from registry
 			if err != nil {
 				fmt.Printf("Returned error: %v", err)
 				continue
@@ -33,8 +33,3 @@ func main() {
 	}
 }
 
-func cleanInput(s string) []string {	//Cleans user input string and returns first word in a lowercase state
-	lowerS := strings.ToLower(s)
-	results := strings.Fields(lowerS)
-	return results
-}
