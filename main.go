@@ -1,15 +1,19 @@
 package main
 
 import (
-	"fmt"
 	"bufio"
+	"fmt"
 	"os"
+	"time"
+
 	"github.com/jms-guy/pokedexproject/internal/pokeapi"
+	"github.com/jms-guy/pokedexproject/internal/pokecache"
 )
 
 func main() {
 	client := pokeapi.NewClient()		//Creating http client
 	configData := pokeapi.ConfigData{}	//Creating base ConfigData struct for json data
+	cache := pokecache.NewCache(10 * time.Second)
 	scanner := bufio.NewScanner(os.Stdin)	//Creates scanner for text input
 	for {
 		fmt.Print("Pokedex > ")
@@ -23,7 +27,7 @@ func main() {
 			fmt.Println("Unknown command")
 			continue
 		} else {
-			err := command.callback(client, &configData)	//Executes command from registry
+			err := command.callback(client, &configData, cache)	//Executes command from registry
 			if err != nil {
 				fmt.Printf("Returned error: %v", err)
 				continue

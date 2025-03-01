@@ -5,17 +5,18 @@ import (
 	"os"
 	"strings"
 	"github.com/jms-guy/pokedexproject/internal/pokeapi"
+	"github.com/jms-guy/pokedexproject/internal/pokecache"
 )
 
 type cliCommand struct {	//Struct for user input commands in the cli
 	name		string
 	description	string
-	callback	func(c *pokeapi.Client, cd *pokeapi.ConfigData) error
+	callback	func(c *pokeapi.Client, cd *pokeapi.ConfigData, cache *pokecache.Cache) error
 }
 
 var commandRegistry map[string]cliCommand	//Declaration of Command Registry
 
-func commandHelp(c *pokeapi.Client, cd *pokeapi.ConfigData) error {	//Help command function
+func commandHelp(c *pokeapi.Client, cd *pokeapi.ConfigData, cache *pokecache.Cache) error {	//Help command function
 	fmt.Println("Welcome to the Pokedex!\nUsage:")
 	for _, cmd := range commandRegistry {
 		fmt.Printf("%s: %s\n", cmd.name, cmd.description)
@@ -23,8 +24,8 @@ func commandHelp(c *pokeapi.Client, cd *pokeapi.ConfigData) error {	//Help comma
 	return nil
 }
 
-func commandMap(c *pokeapi.Client, cd *pokeapi.ConfigData) error {	//Map command function
-	areaResults, err := c.GetLocationAreas(cd.Next)
+func commandMap(c *pokeapi.Client, cd *pokeapi.ConfigData, cache *pokecache.Cache) error {	//Map command function
+	areaResults, err := c.GetLocationAreas(cache, cd.Next)
 	if err != nil {
 		return fmt.Errorf("error getting area location data: %w", err)
 	}
@@ -37,12 +38,12 @@ func commandMap(c *pokeapi.Client, cd *pokeapi.ConfigData) error {	//Map command
 	return nil
 }
 
-func commandMapb(c *pokeapi.Client, cd *pokeapi.ConfigData) error {	//Map command function to go backwards
+func commandMapb(c *pokeapi.Client, cd *pokeapi.ConfigData, cache *pokecache.Cache) error {	//Map command function to go backwards
 	if cd.Previous == nil {
 		fmt.Println("you're on the first page")
 		return nil
 	}
-	areaResults, err := c.GetLocationAreas(cd.Previous)
+	areaResults, err := c.GetLocationAreas(cache, cd.Previous)
 	if err != nil {
 		return fmt.Errorf("error getting area location data: %w", err)
 	}
@@ -55,7 +56,7 @@ func commandMapb(c *pokeapi.Client, cd *pokeapi.ConfigData) error {	//Map comman
 	return nil
 }
 
-func commandExit(c *pokeapi.Client, cd *pokeapi.ConfigData) error {	//Exit command function
+func commandExit(c *pokeapi.Client, cd *pokeapi.ConfigData, cache *pokecache.Cache) error {	//Exit command function
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil

@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type Cache struct {
+type Cache struct {		//Cache struct for holding data
 	Cached	map[string]cacheEntry
 	mu		sync.Mutex
 }
