@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"pokedexproject/internal/api_commands.go"
+	"github.com/jms-guy/pokedexproject/internal/pokeapi"
 )
 
 type cliCommand struct {	//Struct for user input commands in the cli
@@ -14,7 +14,7 @@ type cliCommand struct {	//Struct for user input commands in the cli
 
 var commandRegistry map[string]cliCommand	//Declaration of Command Registry
 
-func commandHelp(c *config) error {	//Help command function
+func commandHelp() error {	//Help command function
 	fmt.Println("Welcome to the Pokedex!\nUsage:")
 	for _, cmd := range commandRegistry {
 		fmt.Printf("%s: %s\n", cmd.name, cmd.description)
@@ -22,11 +22,11 @@ func commandHelp(c *config) error {	//Help command function
 	return nil
 }
 
-func commandMap(c *config) error {	//Map command function
+func commandMap() error {	//Map command function
 
 }
 
-func commandExit(c *config) error {	//Exit command function
+func commandExit() error {	//Exit command function
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil

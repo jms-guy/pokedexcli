@@ -5,9 +5,11 @@ import (
 	"strings"
 	"bufio"
 	"os"
+	"github.com/jms-guy/pokedexproject/internal/pokeapi"
 )
 
 func main() {
+	client := pokeapi.NewClient()		//Creating http client
 	scanner := bufio.NewScanner(os.Stdin)	//Creates scanner for text input
 	for {
 		fmt.Print("Pokedex > ")
