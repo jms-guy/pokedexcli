@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/jms-guy/pokedexproject/internal/pokeapi"
-	"github.com/jms-guy/pokedexproject/internal/pokecache"
+	"github.com/jms-guy/pokedexcli/internal/pokeapi"
+	"github.com/jms-guy/pokedexcli/internal/pokecache"
 )
 
 func main() {

@@ -4,7 +4,7 @@ import (
 	"testing"
 	"fmt"
 	"time"
-	"github.com/jms-guy/pokedexproject/internal/pokecache"
+	"github.com/jms-guy/pokedexcli/internal/pokecache"
 )
 
 func TestAddGet(t *testing.T) {

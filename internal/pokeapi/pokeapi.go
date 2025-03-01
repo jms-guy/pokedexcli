@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"encoding/json"
 	"time"
-	"github.com/jms-guy/pokedexproject/internal/pokecache"
+	"github.com/jms-guy/pokedexcli/internal/pokecache"
 )
 
 type Client struct {	//Client struct for http requests

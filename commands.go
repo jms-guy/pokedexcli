@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"github.com/jms-guy/pokedexproject/internal/pokeapi"
-	"github.com/jms-guy/pokedexproject/internal/pokecache"
+	"github.com/jms-guy/pokedexcli/internal/pokeapi"
+	"github.com/jms-guy/pokedexcli/internal/pokecache"
 )
 
 type cliCommand struct {	//Struct for user input commands in the cli
