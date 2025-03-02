@@ -16,6 +16,10 @@ type cliCommand struct {	//Struct for user input commands in the cli
 
 var commandRegistry map[string]cliCommand	//Declaration of Command Registry
 
+func commandCatch(c *pokeapi.Client, data pokeapi.APIResponse, cache *pokecache.Cache, args []string) error {
+	
+}
+
 func commandHelp(c *pokeapi.Client, data pokeapi.APIResponse, cache *pokecache.Cache, args []string) error {	//Help command function
 	fmt.Println("Welcome to the Pokedex!\nUsage:")
 	for _, cmd := range commandRegistry {
@@ -24,22 +28,23 @@ func commandHelp(c *pokeapi.Client, data pokeapi.APIResponse, cache *pokecache.C
 	return nil
 }
 
-func commandExplore(c *pokeapi.Client, data pokeapi.APIResponse, cache *pokecache.Cache, args []string) error {
+func commandExplore(c *pokeapi.Client, data pokeapi.APIResponse, cache *pokecache.Cache, args []string) error {	//Explore command function
 	if len(args) < 2 {
 		return fmt.Errorf("missing location area name")
 	}
+	areaName := args[1]
+	fmt.Printf("Exploring %s...\n", areaName)
 	
-	pageURL := "https://pokeapi.co/api/v2/location-area/" + args[1]
 	if ed, ok := data.(*pokeapi.LocationAreaDetails); ok {
-		encounterData, err := c.GetAreaExplorationData(cache, pageURL)
+		encounterData, err := c.GetAreaExplorationData(cache, "https://pokeapi.co/api/v2/location-area/"+areaName)
 		if err != nil {
-			return fmt.Errorf("error getting encounter details for area %s: %w", args[1], err)
+			return fmt.Errorf("error getting encounter details for area %s: %w", areaName, err)
 		}
 		ed.Name = encounterData.Name
-		ed.Encounters = encounterData.Encounters
+		ed.PokemonEncounters = encounterData.PokemonEncounters
 		fmt.Println("Found Pokemon:")
-		for _, encounter := range ed.Encounters {
-			fmt.Println(encounter)
+		for _, pokemon := range ed.PokemonEncounters {
+			fmt.Printf(" - %s\n", pokemon.Pokemon.Name)
 		}
 	} else {
 		return fmt.Errorf("command explore requires LocationAreaDetails")
@@ -101,6 +106,11 @@ func cleanInput(s string) []string {	//Cleans user input string and returns firs
 
 func init() {	//Initialization of command registry
 	commandRegistry = map[string]cliCommand{	
+		"catch":	{
+			name:	"catch",
+			description: "Add a pokemon to your pokedex",
+			callback: commandCatch,
+		},
 		"help": {
 			name:	"help",
 			description:	"Displays a help message",

@@ -29,15 +29,12 @@ type ConfigData struct {	//Return struct holding json data returned from http re
 
 type LocationAreaDetails struct {	//Return struct holding location area data for different encounters
 	Name		string				`json:"name"`
-	Encounters	[]PokemonEncounters	`json:"pokemon_encounters"`
-}
-
-type PokemonEncounters struct {	//Struct holding different pokemon encounter data
-	Pokemon	[]Pokemon	`json:"pokemon"`
-}
-
-type Pokemon struct {	//Struct holding each pokemon
-	Name	string	`json:"name"`
+	PokemonEncounters	[]struct {
+		Pokemon	struct {
+			Name	string	`json:"name"`
+			URL		string	`json:"url"`
+		}	`json:"pokemon"`
+	}	`json:"pokemon_encounters"`
 }
 
 func NewClient() *Client {	//Creates new client to handle http requests
@@ -50,9 +47,9 @@ func NewClient() *Client {	//Creates new client to handle http requests
 }
 
 func (c *Client) GetAreaExplorationData(cache *pokecache.Cache, url string) (LocationAreaDetails, error) {	//Function to return pokemon encounter details through explore command function
-	var encounterResults LocationAreaDetails
 	cachedData := checkCache(cache, url)	//Checks cache for data
 	if cachedData != nil {
+		var encounterResults LocationAreaDetails
 		err := json.Unmarshal(cachedData, &encounterResults)
 		if err != nil {
 			return LocationAreaDetails{}, fmt.Errorf("error unmarshaling json data: %w", err)
@@ -71,6 +68,7 @@ func (c *Client) GetAreaExplorationData(cache *pokecache.Cache, url string) (Loc
 	}
 	defer res.Body.Close()
 
+	var encounterResults LocationAreaDetails
 	decoder := json.NewDecoder(res.Body)	//Decodes response data
 	if err := decoder.Decode(&encounterResults); err != nil {
 		return LocationAreaDetails{}, fmt.Errorf("error decoding json data: %w", err)
