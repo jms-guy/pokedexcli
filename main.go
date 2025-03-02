@@ -12,7 +12,7 @@ import (
 
 func main() {
 	client := pokeapi.NewClient()		//Creating http client
-	configData := pokeapi.ConfigData{}	//Creating base ConfigData struct for json data
+	var data pokeapi.APIResponse
 	cache := pokecache.NewCache(10 * time.Second)
 	scanner := bufio.NewScanner(os.Stdin)	//Creates scanner for text input
 	for {
@@ -23,11 +23,16 @@ func main() {
 			continue
 		}
 		command, ok := commandRegistry[userInput[0]]	//Searches registry for command
+		if command.name == "explore" {
+			data = &pokeapi.LocationAreaDetails{}
+		} else {
+			data = &pokeapi.ConfigData{}
+		}
 		if !ok {
 			fmt.Println("Unknown command")
 			continue
 		} else {
-			err := command.callback(client, &configData, cache)	//Executes command from registry
+			err := command.callback(client, data, cache, userInput)	//Executes command from registry
 			if err != nil {
 				fmt.Printf("Returned error: %v", err)
 				continue

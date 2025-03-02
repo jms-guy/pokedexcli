@@ -8,12 +8,16 @@ import (
 	"github.com/jms-guy/pokedexcli/internal/pokecache"
 )
 
+type APIResponse interface {	//Interface for return structs
+	GetName() string
+}
+
 type Client struct {	//Client struct for http requests
 	httpClient	*http.Client
 	baseURL		string
 }
 
-type ConfigData struct {	//Struct holding json data returned from http requests
+type ConfigData struct {	//Return struct holding json data returned from http requests for area locations
 	Count		int		`json:"count"`
 	Next		*string	`json:"next"`
 	Previous	*string	`json:"previous"`
@@ -23,6 +27,19 @@ type ConfigData struct {	//Struct holding json data returned from http requests
 	}	`json:"results"`
 }
 
+type LocationAreaDetails struct {	//Return struct holding location area data for different encounters
+	Name		string				`json:"name"`
+	Encounters	[]PokemonEncounters	`json:"pokemon_encounters"`
+}
+
+type PokemonEncounters struct {	//Struct holding different pokemon encounter data
+	Pokemon	[]Pokemon	`json:"pokemon"`
+}
+
+type Pokemon struct {	//Struct holding each pokemon
+	Name	string	`json:"name"`
+}
+
 func NewClient() *Client {	//Creates new client to handle http requests
 	return &Client{
 		httpClient: &http.Client{
@@ -30,6 +47,40 @@ func NewClient() *Client {	//Creates new client to handle http requests
 		},
 		baseURL: "https://pokeapi.co/api/v2",
 	}
+}
+
+func (c *Client) GetAreaExplorationData(cache *pokecache.Cache, url string) (LocationAreaDetails, error) {	//Function to return pokemon encounter details through explore command function
+	var encounterResults LocationAreaDetails
+	cachedData := checkCache(cache, url)	//Checks cache for data
+	if cachedData != nil {
+		err := json.Unmarshal(cachedData, &encounterResults)
+		if err != nil {
+			return LocationAreaDetails{}, fmt.Errorf("error unmarshaling json data: %w", err)
+		}
+		return encounterResults, nil
+	}
+
+	req, err := http.NewRequest("GET", url, nil)	//Makes hhtp request
+	if err != nil {
+		return LocationAreaDetails{}, fmt.Errorf("error making request: %w", err)
+	}
+
+	res, err := c.httpClient.Do(req)	//Sends http request
+	if err != nil {
+		return LocationAreaDetails{}, fmt.Errorf("error requesting data: %w", err)
+	}
+	defer res.Body.Close()
+
+	decoder := json.NewDecoder(res.Body)	//Decodes response data
+	if err := decoder.Decode(&encounterResults); err != nil {
+		return LocationAreaDetails{}, fmt.Errorf("error decoding json data: %w", err)
+	}
+	dataToCache, err := json.Marshal(encounterResults)	//Marshals data into cache
+	if err != nil {
+		return encounterResults, fmt.Errorf("error marshaling data for cache: %w", err)
+	}
+	cache.Add(url, dataToCache)
+	return encounterResults, nil
 }
 
 func (c *Client) GetLocationAreas(cache *pokecache.Cache, pageURL *string) (ConfigData, error) {	//Function to get area locations through map command functions
@@ -78,4 +129,12 @@ func checkCache(c *pokecache.Cache, pageURL string) []byte {	//Checks cache for 
 		return nil
 	}
 	return val
+}
+
+func (c *ConfigData) GetName() string {		//Struct method to satisfy interface definition
+	return ""
+}
+
+func (l *LocationAreaDetails) GetName() string {	//Struct method to satisfy interface definition
+	return ""
 }

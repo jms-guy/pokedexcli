@@ -75,8 +75,8 @@ func TestCleanInput(t *testing.T) {
 			expected: []string{"broke", "and", "even"},
 		},
 		{
-			input:	" Bulbasaur  Chikorita   123  an    hour   ",
-			expected: []string{"bulbasaur", "chikorita", "123", "an", "hour"},
+			input:	" Bulbasaur  Chikorita   123-an-hour   ",
+			expected: []string{"bulbasaur", "chikorita", "123-an-hour"},
 		},
 	}
 
