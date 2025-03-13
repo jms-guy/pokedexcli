@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+// Function to generate a catch rate for pokemon in main function, currently not being used, but can be re-implemented if desired.
+
 func GetCatchBool(baseExp int) bool {	//Get catch chance for pokemon, very simple implmentation
 	rand.NewSource(time.Now().UTC().UnixNano())
 	randomInt := rand.Intn(100)	//Random number between 0-100

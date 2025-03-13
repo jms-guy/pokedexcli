@@ -5,22 +5,21 @@ import (
 	"fmt"
 	"os"
 	"time"
-
 	"github.com/jms-guy/pokedexcli/internal/pokeapi"
 	"github.com/jms-guy/pokedexcli/internal/pokecache"
 )
 
 type PokedexApp struct {		//Encapsulated shared state struct for functional refinement
-	client		*pokeapi.Client	//Http client
-	cache		*pokecache.Cache	//Data cache
-	userPokedex	map[string]pokeapi.PokemonDetails	//Pokedex
+	Client		*pokeapi.Client	//Http Client
+	Cache		*pokecache.Cache	//Data Cache
+	UserPokedex	map[string]pokeapi.PokemonDetails	//Pokedex
 }
 
 func main() {
 	app := &PokedexApp{	//Create shared state struct
-		client: 	pokeapi.NewClient(),		
-		cache: 		pokecache.NewCache(10 * time.Second),
-		userPokedex: make(map[string]pokeapi.PokemonDetails),
+		Client: 	pokeapi.NewClient(),		
+		Cache: 		pokecache.NewCache(10 * time.Second),
+		UserPokedex: make(map[string]pokeapi.PokemonDetails),
 	}
 	scanner := bufio.NewScanner(os.Stdin)	//Creates scanner for text input
 
@@ -57,3 +56,7 @@ func main() {
 	}
 }
 
+
+func (app *PokedexApp) GetUserPokedex() map[string]pokeapi.PokemonDetails {	//Interface function to return pokedex data to filefunctions
+	return app.UserPokedex
+}

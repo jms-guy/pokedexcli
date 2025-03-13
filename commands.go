@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 	"github.com/jms-guy/pokedexcli/internal/pokeapi"
-	"github.com/jms-guy/pokedexcli/internal/catch_chance"
+	"github.com/jms-guy/pokedexcli/internal/filefunctions"
 )
 
 type cliCommand struct {	//Struct for user input commands in the cli
@@ -16,13 +16,25 @@ type cliCommand struct {	//Struct for user input commands in the cli
 
 var commandRegistry map[string]cliCommand	//Declaration of Command Registry
 
-func commandPokedex(app *PokedexApp, data pokeapi.APIResponse, args []string) error {
-	if len(app.userPokedex) == 0 {
+func commandSave(app *PokedexApp, data pokeapi.APIResponse, args []string) error {	//Save command function, saves current pokedex data into a file on disk
+	if len(app.UserPokedex) == 0 {
+		fmt.Println("You have no pokemon in your Pokedex.")
+		return nil
+	}
+	err := filefunctions.SavePokedex(app)
+	if err != nil {
+		return fmt.Errorf("error saving pokedex data: %w", err)
+	}
+	fmt.Println("Pokedex saved!")
+	return nil
+}
+func commandPokedex(app *PokedexApp, data pokeapi.APIResponse, args []string) error {	//Pokedex command function
+	if len(app.UserPokedex) == 0 {
 		fmt.Println("You have no pokemon in your Pokedex.")
 		return nil
 	}
 	fmt.Println("Your Pokedex:")
-	for name := range app.userPokedex {
+	for name := range app.UserPokedex {
 		fmt.Printf(" - %s\n", name)
 	}
 	return nil
@@ -30,7 +42,7 @@ func commandPokedex(app *PokedexApp, data pokeapi.APIResponse, args []string) er
 
 func commandInspect(app *PokedexApp, data pokeapi.APIResponse, args []string) error {	//Inspect command function
 	pokemonName := args[1]
-	pokemon, ok := app.userPokedex[pokemonName];	//Check if pokemon has been caught
+	pokemon, ok := app.UserPokedex[pokemonName];	//Check if pokemon has been caught
 	if !ok {
 		fmt.Println("User has not caught this pokemon.")
 		return nil
@@ -57,24 +69,15 @@ func commandCatch(app *PokedexApp, data pokeapi.APIResponse, args []string) erro
 		return fmt.Errorf(("missing pokemon name or id number"))
 	}
 	pokemonName := args[1]
-	fmt.Printf("Throwing a Pokeball at %s...\n", pokemonName)
 
-
-	pokemonData, err := app.client.GetPokemonData(app.cache, "https://pokeapi.co/api/v2/pokemon/"+pokemonName)
+	pokemonData, err := app.Client.GetPokemonData(app.Cache, "https://pokeapi.co/api/v2/pokemon/"+pokemonName)
 	if err != nil {
 		return fmt.Errorf("error getting data for %s: %w", pokemonName, err)
 	}
-	expVal := pokemonData.BaseExperience
-	if expVal == 0 {
-		return fmt.Errorf("missing base experience value")
-	}
-	if catchchance.GetCatchBool(expVal) {	//Check catch chance
-		fmt.Printf("%s was caught!\n", pokemonName)
-		fmt.Println("You may now inspect it with the inspect command.")
-		app.userPokedex[pokemonName] = pokemonData
-	} else {
-		fmt.Printf("%s escaped!\n", pokemonName)
-	}
+	
+	fmt.Printf("%s was caught!\n", pokemonName)
+	fmt.Println("You may now inspect it with the inspect command.")
+	app.UserPokedex[pokemonName] = pokemonData
 	return nil
 }
 
@@ -95,7 +98,7 @@ func commandExplore(app *PokedexApp, data pokeapi.APIResponse, args []string) er
 	fmt.Printf("Exploring %s...\n", areaName)
 	
 	if ed, ok := data.(*pokeapi.LocationAreaDetails); ok {
-		encounterData, err := app.client.GetAreaExplorationData(app.cache, "https://pokeapi.co/api/v2/location-area/"+areaName)
+		encounterData, err := app.Client.GetAreaExplorationData(app.Cache, "https://pokeapi.co/api/v2/location-area/"+areaName)
 		if err != nil {
 			return fmt.Errorf("error getting encounter details for area %s: %w", areaName, err)
 		}
@@ -113,7 +116,7 @@ func commandExplore(app *PokedexApp, data pokeapi.APIResponse, args []string) er
 
 func commandMap(app *PokedexApp, data pokeapi.APIResponse, args []string) error {	//Map command function
 	if configData, ok := data.(*pokeapi.ConfigData); ok {
-		areaResults, err := app.client.GetLocationAreas(app.cache, configData.Next)
+		areaResults, err := app.Client.GetLocationAreas(app.Cache, configData.Next)
 		if err != nil {
 			return fmt.Errorf("error getting area location data: %w", err)
 		}
@@ -135,7 +138,7 @@ func commandMapb(app *PokedexApp, data pokeapi.APIResponse, args []string) error
 			fmt.Println("you're on the first page")
 			return nil
 		}
-		areaResults, err := app.client.GetLocationAreas(app.cache, cd.Previous)
+		areaResults, err := app.Client.GetLocationAreas(app.Cache, cd.Previous)
 		if err != nil {
 			return fmt.Errorf("error getting area location data: %w", err)
 		}
@@ -204,6 +207,11 @@ func init() {	//Initialization of command registry
 			name: "pokedex",
 			description: "Displays names of all pokemon user has caught",
 			callback: commandPokedex,
+		},
+		"save": {
+			name: "save",
+			description: "Saves the current pokedex to a file",
+			callback: commandSave,
 		},
 	}
 }
