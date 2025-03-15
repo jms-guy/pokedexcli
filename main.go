@@ -28,6 +28,7 @@ func main() {
 	configData := &pokeapi.ConfigData{}	//Create data structures for storage use
     locationAreaData := &pokeapi.LocationAreaDetails{}
     pokemonData := &pokeapi.PokemonDetails{}
+	encounterData := &pokeapi.EncounterAreas{}
 
 	for {
 		fmt.Print("Pokedex > ")
@@ -44,8 +45,10 @@ func main() {
 		var data pokeapi.APIResponse	//Creates empty interface to assign data structure to based on command
 		if command.name == "explore" {
 			data = locationAreaData
-		} else if (command.name == "map") || (command.name == "mapb") {
+		} else if (command.name == "map") || (command.name == "mapb") {	//Currently disabled functions//
 			data = configData
+		} else if command.name == "find" {
+			data = encounterData
 		} else {
 			data = pokemonData
 		}		

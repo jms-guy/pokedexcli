@@ -8,6 +8,7 @@ import (
 	"slices"
 	"github.com/jms-guy/pokedexcli/internal/pokeapi"
 	"github.com/jms-guy/pokedexcli/internal/filefunctions"
+	"github.com/jms-guy/pokedexcli/internal/versionfunctions"
 )
 
 //Pokedex command functions//
@@ -21,10 +22,6 @@ type cliCommand struct {	//Struct for user input commands in the cli
 }
 
 var commandRegistry map[string]cliCommand	//Declaration of Command Registry
-
-func commandFind(app *PokedexApp, data pokeapi.APIResponse, args []string) error {	//Find command function, returns list of game locations where the input pokemon can be found, in the version set by user
-
-}
 
 func commandCheckVersion(app *PokedexApp, data pokeapi.APIResponse, args []string) error {	//Returns the current version set by the user
 	if app.Version == "" {
@@ -151,6 +148,30 @@ func commandHelp(app *PokedexApp, data pokeapi.APIResponse, args []string) error
 	for _, k := range keys {
 		cmd := commandRegistry[k]
 		fmt.Printf(" %s: %s\n", cmd.name, cmd.description)
+	}
+	return nil
+}
+
+func commandFind(app *PokedexApp, data pokeapi.APIResponse, args []string) error {	//Find command function, returns list of game locations where the input pokemon can be found, in the version set by user
+	if len(args) < 2 {
+		fmt.Println("Missing pokemon name")
+		return nil
+	}
+	pokemonName := args[1]
+	gameVersion := app.Version
+	fmt.Printf("%s locations in %s:\n", pokemonName, gameVersion)
+
+	if _, ok := data.(*pokeapi.EncounterAreas); !ok {
+		return fmt.Errorf("command find requires EncounterAreas")
+	}
+	encounterData, err := app.Client.GetEncounterData(app.Cache, "https://pokeapi.co/api/v2/pokemon/"+pokemonName+"/encounters")	//Gets pokeapi data of encounter locations
+	if err != nil {
+		return fmt.Errorf("error retrieving %s encounter data: %w", pokemonName, err)
+	}
+
+	relevantEncounters := versionfunctions.VersionEncounters(encounterData, gameVersion)	//Sorts encounter data for only version relevant data
+	for areaName, details := range relevantEncounters {
+		fmt.Printf("%s:\n %v", areaName, details)
 	}
 	return nil
 }

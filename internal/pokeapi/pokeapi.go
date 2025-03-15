@@ -8,7 +8,7 @@ import (
 	"github.com/jms-guy/pokedexcli/internal/pokecache"
 )
 
-//API call functions, list of functions each making different api requests to PokeAPI. Might've been able to use a single function for all calls? Seemed easier to make a new function for each different request.//
+//API call functions, list of functions each making different api requests to PokeAPI. Probably could've used a single function for all calls? Seemed easier to make a new function for each different request.//
 
 func NewClient() *Client {	//Creates new client to handle http requests
 	return &Client{
@@ -19,8 +19,40 @@ func NewClient() *Client {	//Creates new client to handle http requests
 	}
 }
 
-func (c *Client) GetEncounterData(cache *pokecache.Cache, url string, version string) (EncounterAreas, error) {
-	
+func (c *Client) GetEncounterData(cache *pokecache.Cache, url string) (EncounterAreas, error) {	//Function to retrieve encounter locations for user input pokemon, through find command - version specific, based on user input game version
+	cachedData := checkCache(cache, url)	//Check cache for stored data
+	if cachedData != nil {
+		var encounterResults EncounterAreas
+		err := json.Unmarshal(cachedData, &encounterResults)
+		if err != nil {
+			return EncounterAreas{}, fmt.Errorf("error unmarshaling data from cache: %w", err)
+		}
+		return encounterResults, nil
+	}
+
+	req, err := http.NewRequest("GET", url, nil)	//Makes http request
+	if err != nil {
+		return EncounterAreas{}, fmt.Errorf("error making request: %w", err)
+	}
+
+	res, err := c.httpClient.Do(req)	//Sends request
+	if err != nil {
+		return EncounterAreas{}, fmt.Errorf("error requesting data: %w", err)
+	}
+	defer res.Body.Close()
+
+	var encounterResults EncounterAreas
+	decoder := json.NewDecoder(res.Body)	//Decodes response
+	if err := decoder.Decode(&encounterResults); err != nil {
+		return EncounterAreas{}, fmt.Errorf("error decoding json data: %w", err)
+	}
+
+	dataToCache, err := json.Marshal(encounterResults) //Marshals data for cache
+	if err != nil {
+		return encounterResults, fmt.Errorf("error marshing data for cache: %w", err)
+	}
+	cache.Add(url, dataToCache)
+	return encounterResults, nil
 }
 
 func (c *Client) GetPokemonData(cache *pokecache.Cache, url string) (PokemonDetails, error) {	//Function to return pokemon details through catch command
