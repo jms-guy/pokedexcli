@@ -8,7 +8,7 @@ import (
 	"github.com/jms-guy/pokedexcli/internal/pokecache"
 )
 
-//API call functions//
+//API call functions, list of functions each making different api requests to PokeAPI. Might've been able to use a single function for all calls? Seemed easier to make a new function for each different request.//
 
 func NewClient() *Client {	//Creates new client to handle http requests
 	return &Client{
@@ -17,6 +17,10 @@ func NewClient() *Client {	//Creates new client to handle http requests
 		},
 		baseURL: "https://pokeapi.co/api/v2",
 	}
+}
+
+func (c *Client) GetEncounterData(cache *pokecache.Cache, url string, version string) (EncounterAreas, error) {
+	
 }
 
 func (c *Client) GetPokemonData(cache *pokecache.Cache, url string) (PokemonDetails, error) {	//Function to return pokemon details through catch command

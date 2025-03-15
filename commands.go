@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 	"sort"
+	"slices"
 	"github.com/jms-guy/pokedexcli/internal/pokeapi"
 	"github.com/jms-guy/pokedexcli/internal/filefunctions"
 )
@@ -20,6 +21,10 @@ type cliCommand struct {	//Struct for user input commands in the cli
 }
 
 var commandRegistry map[string]cliCommand	//Declaration of Command Registry
+
+func commandFind(app *PokedexApp, data pokeapi.APIResponse, args []string) error {	//Find command function, returns list of game locations where the input pokemon can be found, in the version set by user
+
+}
 
 func commandCheckVersion(app *PokedexApp, data pokeapi.APIResponse, args []string) error {	//Returns the current version set by the user
 	if app.Version == "" {
@@ -44,6 +49,24 @@ func commandSetVersion(app *PokedexApp, data pokeapi.APIResponse, args []string)
 	}
 	app.Version = version	//Sets version
 	fmt.Printf("Version set to %s\n", version)
+	return nil
+}
+
+func commandVersions(app *PokedexApp, data pokeapi.APIResponse, args []string) error {	//Versions command function, simply returns the list of strings in the Versions enum in versions.go, representing the supported game versions
+	fmt.Println("Currently supported versions:")
+	versions := make([]string, 0)	//Creates a string to place the version names into, to make sorting easier (map sorting sucks)
+	for _, vName := range versionName {
+		versions = append(versions, vName)
+	}
+	slices.Sort(versions)	//Sorts version names alphabetically, and prints them
+	for i, version := range versions {
+		if i == len(versions) - 1 {
+			fmt.Printf("%s", version)
+		} else {
+			fmt.Printf("%s : ", version)
+		}
+	}
+	fmt.Println("")
 	return nil
 }
 
@@ -219,20 +242,25 @@ func ParseVersion(input string) (Version, error) {	//Checks version input used i
 }
 
 func init() {	//Initialization of command registry
-	commandRegistry = map[string]cliCommand{	
+	commandRegistry = map[string]cliCommand{
+		"find":	{
+			name: "find",
+			description: "Returns a list of locations where the given pokemon can be found in set game version -> find _____",
+			callback: commandFind,
+		},	
 		"catch":	{
 			name:	"catch",
-			description: "Add a pokemon to your pokedex",
+			description: "Add a pokemon to your pokedex -> catch _____",
 			callback: commandCatch,
 		},
 		"help": {
 			name:	"help",
-			description:	"Displays a help message",
+			description:	"Displays a help message.",
 			callback:	commandHelp,
 		},
 		"inspect": {
 			name:	"inspect",
-			description: "Shows details of a caught pokemon",
+			description: "Shows details of a caught pokemon -> inspect _____",
 			callback: commandInspect,
 		},
 		/*
@@ -249,38 +277,43 @@ func init() {	//Initialization of command registry
 		*/
 		"exit":	{
 			name:	"exit",
-			description:	"Exit the Pokedex",
+			description:	"Exit the Pokedex.",
 			callback:	commandExit,
 		},
 		"explore":	{
 			name:	"explore",
-			description:	"Explore a location for available pokemon to catch",
+			description:	"Explore a location for available pokemon to catch -> explore _____",
 			callback:	commandExplore,
 		},
 		"pokedex": {
 			name: "pokedex",
-			description: "Displays names of all pokemon user has caught",
+			description: "Displays names of all pokemon user has caught.",
 			callback: commandPokedex,
 		},
 		"save": {
 			name: "save",
-			description: "Saves the current pokedex to a file",
+			description: "Saves the current pokedex to a file. Only one save file is currently supported, if you save without loading a previous save, that save will be overwritten.",
 			callback: commandSave,
 		},
 		"load": {
 			name: "load",
-			description: "Load saved Pokedex data from file",
+			description: "Load saved Pokedex data from file. Loading data will not overwrite pokemon currently in Pokedex, it will add to it.",
 			callback: commandLoad,
 		},
 		"set-version": {
 			name: "set-version",
-			description: "Sets the current pokedex version(red, blue, gold, violet, etc.)",
+			description: "Sets the current pokedex version(red, blue, gold, violet, etc.) -> set-version _____",
 			callback: commandSetVersion,
 		},
 		"check-version":	{
 			name: "check-version",
-			description: "Returns current Pokedex game version",
+			description: "Returns current Pokedex game version.",
 			callback: commandCheckVersion,
+		},
+		"versions": {
+			name: "versions",
+			description: "Displays list of currently supported game versions.",
+			callback: commandVersions,
 		},
 	}
 }

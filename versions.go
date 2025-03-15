@@ -1,6 +1,6 @@
 package main
 
-//Version enum "structure" used to validate the input by the user, making sure it's a valid, working game version.\\
+//Version enum "structure" used to validate the input by the user, making sure it's a valid, working game version. Used in version commands.\\
 
 type Version int
 

@@ -8,6 +8,7 @@ import (
 )
 
 //Currently only one save file is supported, if you have previous saved data and do not load it upon restarting the program, the save data will be overwritten on another save.
+//Add multiple saves? Possibly on program start? Save directory, store all user saves in there?
 
 type PokedexProvider interface {
 	GetUserPokedex() *map[string]pokeapi.PokemonDetails

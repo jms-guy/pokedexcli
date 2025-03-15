@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-//API response structs//
+//API response structs, storing different response information depending on the request sent to the PokeAPI//
 
 type APIResponse interface {	//Interface for return structs
 	GetName() string
@@ -15,7 +15,8 @@ type Client struct {	//Client struct for http requests
 	baseURL		string
 }
 
-type ConfigData struct {	//Return struct holding json data returned from http requests for area locations (map/mapb commands)
+// This structure's command function are currently unused
+type ConfigData struct {	//Return struct holding json data returned from http requests for area locations (map/mapb commands) 
 	Count		int		`json:"count"`
 	Next		*string	`json:"next"`
 	Previous	*string	`json:"previous"`
@@ -36,24 +37,10 @@ type LocationAreaDetails struct {	//Return struct holding location area data for
 }
 
 type PokemonDetails struct {	//Return struct holding detailed pokemon data (catch command)
-	Abilities []struct {
-		Ability struct {
-			Name string `json:"name"`
-			URL  string `json:"url"`
-		} `json:"ability"`
-		IsHidden bool `json:"is_hidden"`
-		Slot     int  `json:"slot"`
-	} `json:"abilities"`
 	BaseExperience int `json:"base_experience"`
 	Height                 int    `json:"height"`
 	ID                     int    `json:"id"`
 	LocationAreaEncounters string `json:"location_area_encounters"`
-	Moves                  []struct {
-		Move struct {
-			Name string `json:"name"`
-			URL  string `json:"url"`
-		} `json:"move"`
-	} `json:"moves"`
 	Name          string `json:"name"`
 	Stats []struct {
 		BaseStat int `json:"base_stat"`
@@ -73,14 +60,44 @@ type PokemonDetails struct {	//Return struct holding detailed pokemon data (catc
 	Weight int `json:"weight"`
 }
 
-func (c *ConfigData) GetName() string {		//Struct method to satisfy interface definition
+type EncounterAreas []struct {	//Return struct holding pokemon encounter data (find _____ command)
+	LocationArea struct {
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	} `json:"location_area"`
+	VersionDetails []struct {
+		EncounterDetails []struct {
+			Chance          int   `json:"chance"`
+			ConditionValues []any `json:"condition_values"`
+			MaxLevel        int   `json:"max_level"`
+			Method          struct {
+				Name string `json:"name"`
+				URL  string `json:"url"`
+			} `json:"method"`
+			MinLevel int `json:"min_level"`
+		} `json:"encounter_details"`
+		MaxChance int `json:"max_chance"`
+		Version   struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"version"`
+	} `json:"version_details"`
+}
+
+//Struct methods to allow each response structure to satisfy the APIResponse interface, allowing all structs to be passed into the command functions properly//
+
+func (c *ConfigData) GetName() string {		
 	return ""
 }
 
-func (l *LocationAreaDetails) GetName() string {	//Struct method to satisfy interface definition
+func (l *LocationAreaDetails) GetName() string {	
 	return ""
 }
 
-func (p *PokemonDetails) GetName() string {	//Struct method to sastisfy interface definition
+func (p *PokemonDetails) GetName() string {	
+	return ""
+}
+
+func (e *EncounterAreas) GetName() string {
 	return ""
 }
