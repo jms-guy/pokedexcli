@@ -200,7 +200,7 @@ func commandExplore(app *PokedexApp, data pokeapi.APIResponse, args []string) er
 	}
 	return nil
 }
-/*
+
 func commandMap(app *PokedexApp, data pokeapi.APIResponse, args []string) error {	//Map command function
 	if configData, ok := data.(*pokeapi.ConfigData); ok {
 		areaResults, err := app.Client.GetLocationAreas(app.Cache, configData.Next)
@@ -240,7 +240,7 @@ func commandMapb(app *PokedexApp, data pokeapi.APIResponse, args []string) error
 	}
 	return nil
 }
-*/
+
 func commandExit(app *PokedexApp, data pokeapi.APIResponse, args []string) error {	//Exit command function, closes the program
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
@@ -284,7 +284,7 @@ func init() {	//Initialization of command registry
 			description: "Shows details of a caught pokemon -> inspect _____",
 			callback: commandInspect,
 		},
-		/*
+		
 		"map":	{
 			name:	"map",
 			description: "Displays 20 area locations in the Pokemon world",
@@ -295,7 +295,7 @@ func init() {	//Initialization of command registry
 			description: "Displays the previous 20 area locations in the Pokemon world",
 			callback: commandMapb,
 		},
-		*/
+		
 		"exit":	{
 			name:	"exit",
 			description:	"Exit the Pokedex.",

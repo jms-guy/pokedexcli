@@ -15,6 +15,29 @@ type Client struct {	//Client struct for http requests
 	baseURL		string
 }
 
+type VersionGroup struct {	//Return struct holding general version data from set-version command
+	Generation struct {
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	} `json:"generation"`
+	ID               int    `json:"id"`
+	MoveLearnMethods []any  `json:"move_learn_methods"`
+	Name             string `json:"name"`
+	Order            int    `json:"order"`
+	Pokedexes        []struct {
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	} `json:"pokedexes"`
+	Regions []struct {
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	} `json:"regions"`
+	Versions []struct {
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	} `json:"versions"`
+}
+
 // This structure's command function are currently unused
 type ConfigData struct {	//Return struct holding json data returned from http requests for area locations (map/mapb commands) 
 	Count		int		`json:"count"`

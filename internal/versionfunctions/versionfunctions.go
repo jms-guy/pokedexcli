@@ -6,7 +6,7 @@ import (
 
 //These are functions related to the command functions that return different results based on the version input by the user. Such as sorting response data relevant to the game version.//
 
-type VersionDetails []struct {
+type VersionDetails []struct {	//Return struct slice for storing refined data from find command function
 	EncounterDetails []struct {
 			Chance          int   `json:"chance"`
 			ConditionValues []any `json:"condition_values"`
