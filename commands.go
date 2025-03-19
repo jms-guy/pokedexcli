@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 	"sort"
 	"slices"
 	"github.com/jms-guy/pokedexcli/internal/pokeapi"
@@ -13,7 +12,7 @@ import (
 
 //Pokedex command functions//
 //Map commands are currently disabled, right now I have no use for the random exploration functions
-//To-do functions : find ____ -> finds pokemon in current game version, areas -> lists areas in current game version
+//To-do functions :  areas -> lists areas in current game version, pokemon -> lists all pokemon in version pokedex
 
 type cliCommand struct {	//Struct for user input commands in the cli
 	name		string
@@ -24,11 +23,11 @@ type cliCommand struct {	//Struct for user input commands in the cli
 var commandRegistry map[string]cliCommand	//Declaration of Command Registry
 
 func commandCheckVersion(app *PokedexApp, data pokeapi.APIResponse, args []string) error {	//Returns the current version set by the user
-	if app.Version == "" {
+	if app.CurrVersion == ""  {
 		fmt.Println("No version currently set.")
 		return nil
 	}
-	fmt.Printf("Game version set to: %s\n", app.Version)
+	fmt.Printf("Game version set to: %s\n", app.CurrVersion)
 	return nil
 }
 
@@ -44,7 +43,15 @@ func commandSetVersion(app *PokedexApp, data pokeapi.APIResponse, args []string)
 		fmt.Printf("error parsing version input: %s\n", err)
 		return nil
 	}
-	app.Version = version	//Sets version
+	_, exists := app.Version[version]	//Check if version group data already in map
+	if !exists {
+		versionResults, err := app.Client.GetVersionGroup(app.Cache, "https://pokeapi.co/api/v2/version/"+version)	//If not, fetch it
+		if err != nil {
+			return err
+		}
+		app.Version[version] = versionResults	//Adds version details
+	}
+	app.CurrVersion = version
 	fmt.Printf("Version set to %s\n", version)
 	return nil
 }
@@ -158,8 +165,7 @@ func commandFind(app *PokedexApp, data pokeapi.APIResponse, args []string) error
 		return nil
 	}
 	pokemonName := args[1]
-	gameVersion := app.Version
-	fmt.Printf("%s locations in %s:\n", pokemonName, gameVersion)
+	gameVersion := app.CurrVersion
 
 	if _, ok := data.(*pokeapi.EncounterAreas); !ok {
 		return fmt.Errorf("command find requires EncounterAreas")
@@ -170,8 +176,50 @@ func commandFind(app *PokedexApp, data pokeapi.APIResponse, args []string) error
 	}
 
 	relevantEncounters := versionfunctions.VersionEncounters(encounterData, gameVersion)	//Sorts encounter data for only version relevant data
+
+	if len(relevantEncounters) == 0 {
+		fmt.Println("No location data for this Pokemon found in this version.")
+	} else {
+		fmt.Printf("%s locations in %s:\n", pokemonName, gameVersion)
+	}
+
 	for areaName, details := range relevantEncounters {
-		fmt.Printf("%s:\n %v", areaName, details)
+		fmt.Printf("--------------- %s ---------------\n", areaName)
+		
+    	seenEncounters := make(map[string]struct{})	//Unique encounters
+		
+    	for _, enDetails := range details {
+        	for _, encounter := range enDetails.EncounterDetails {
+				conditions := extractConditionNames(encounter.ConditionValues)	//Make conditionvalues much more readable
+				if conditions == "" || conditions == "[]" {
+					conditions = "None"
+				}
+				// Create a unique key for each encounter
+				uniqueKey := fmt.Sprintf("%v-%v-%d-%d-%s",
+					enDetails.MaxChance,      // Max chance as part of the key
+					conditions, // Conditions as part of the key
+					encounter.MinLevel,        // Min level as part of the key
+					encounter.MaxLevel,        // Max level as part of the key
+					encounter.Method.Name,     // Method name as part of the key
+				)
+
+				// Skip if we've already printed this encounter
+				if _, exists := seenEncounters[uniqueKey]; exists {
+					continue
+				}
+
+				// Mark this encounter as seen
+				seenEncounters[uniqueKey] = struct{}{}
+
+
+    	fmt.Printf("***** Chance: %d ***** Conditions: %v ***** Level: %d ***** Method: %s *****\n",
+							enDetails.MaxChance,
+							conditions,
+							encounter.MaxLevel,
+							encounter.Method.Name,
+							)
+			}
+		}
 	}
 	return nil
 }
@@ -247,26 +295,11 @@ func commandExit(app *PokedexApp, data pokeapi.APIResponse, args []string) error
 	return nil
 }
 
-func cleanInput(s string) []string {	//Cleans user input string for command arguments use
-	lowerS := strings.ToLower(s)
-	results := strings.Fields(lowerS)
-	return results
-}
-
-func ParseVersion(input string) (Version, error) {	//Checks version input used in set-version command against enum struct in versions.go
-	for v, name := range versionName {
-		if name == input {
-			return v, nil
-		}
-	}
-	return 0, fmt.Errorf("unknown version: %s", input)
-}
-
 func init() {	//Initialization of command registry
 	commandRegistry = map[string]cliCommand{
 		"find":	{
 			name: "find",
-			description: "Returns a list of locations where the given pokemon can be found in set game version -> find _____",
+			description: "Returns a list of locations where the given pokemon can be found in set game version. Limited functionality in more recent versions. -> find _____",
 			callback: commandFind,
 		},	
 		"catch":	{

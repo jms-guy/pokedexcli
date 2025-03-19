@@ -4,11 +4,43 @@ import (
 	"fmt"
 	"net/http"
 	"encoding/json"
+	"time"
 	"github.com/jms-guy/pokedexcli/internal/pokecache"
 )
 
+func NewClient() *Client {	//Creates new client to handle http requests
+	return &Client{
+		httpClient: &http.Client{
+			Timeout:	time.Minute,
+		},
+		baseURL: "https://pokeapi.co/api/v2",
+	}
+}
 
-func makeHttpRequest(c *Client, url string, dataStruct interface{}) (error) {	//Makes http request and handles resposne
+func requestAndCacheHandling(c *Client, cache *pokecache.Cache, url string, dataStruct any) error {	//Function that combines the other helper functions into one, that handles getting cached data, making http requests, and storing data to cache
+	found, err := getCachedData(cache, url, dataStruct)	//Checks cache
+	if err != nil {
+		return err
+	}
+	if found {
+		return nil
+	}
+
+	//No cache data found
+	httpErr := makeHttpRequest(c, url, dataStruct)	//Http request
+	if httpErr != nil {
+		return httpErr
+	}
+
+	cacheErr := storeIntoCache(cache, url, dataStruct)	//Stores data in cache
+	if cacheErr != nil {
+		return cacheErr
+	}
+
+	return nil
+}
+
+func makeHttpRequest(c *Client, url string, dataStruct any) (error) {	//Makes http request and handles resposne
 	req, err := http.NewRequest("GET", url, nil)	//Creates http request
 	if err != nil {
 		return  fmt.Errorf("error making request: %w", err)
@@ -27,7 +59,7 @@ func makeHttpRequest(c *Client, url string, dataStruct interface{}) (error) {	//
 	return nil
 }
 
-func getCachedData(cache *pokecache.Cache, url string, dataStruct interface{}) (bool, error) {	//Retrieves cache data
+func getCachedData(cache *pokecache.Cache, url string, dataStruct any) (bool, error) {	//Retrieves cache data
 	cachedData := checkCache(cache, url)
 	if cachedData == nil {
         return false, nil // Cache miss
@@ -40,7 +72,7 @@ func getCachedData(cache *pokecache.Cache, url string, dataStruct interface{}) (
     return true, nil // Cache hit
 }
 
-func storeIntoCache(cache *pokecache.Cache, url string, datastruct interface{}) error {	//Marshals data and stores it in cache
+func storeIntoCache(cache *pokecache.Cache, url string, datastruct any) error {	//Marshals data and stores it in cache
 	dataToCache, err := json.Marshal(datastruct)
 	if err != nil {
 		return fmt.Errorf("error marshaling data for cache: %w", err)

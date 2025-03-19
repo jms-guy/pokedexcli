@@ -15,6 +15,22 @@ type Client struct {	//Client struct for http requests
 	baseURL		string
 }
 
+type Version struct {	//Return struct holding version data from set-version command
+	ID    int    `json:"id"`
+	Name  string `json:"name"`
+	Names []struct {
+		Language struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"language"`
+		Name string `json:"name"`
+	} `json:"names"`
+	VersionGroup struct {
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	} `json:"version_group"`
+}
+
 type VersionGroup struct {	//Return struct holding general version data from set-version command
 	Generation struct {
 		Name string `json:"name"`
@@ -38,7 +54,6 @@ type VersionGroup struct {	//Return struct holding general version data from set
 	} `json:"versions"`
 }
 
-// This structure's command function are currently unused
 type ConfigData struct {	//Return struct holding json data returned from http requests for area locations (map/mapb commands) 
 	Count		int		`json:"count"`
 	Next		*string	`json:"next"`
