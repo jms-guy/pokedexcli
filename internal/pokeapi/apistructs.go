@@ -6,10 +6,6 @@ import (
 
 //API response structs, storing different response information depending on the request sent to the PokeAPI//
 
-type APIResponse interface {	//Interface for return structs
-	GetName() string
-}
-
 type Client struct {	//Client struct for http requests
 	httpClient	*http.Client
 	baseURL		string
@@ -29,6 +25,34 @@ type Version struct {	//Return struct holding version data from set-version comm
 		Name string `json:"name"`
 		URL  string `json:"url"`
 	} `json:"version_group"`
+}
+
+type RegionData struct {	//Return struct holding region data
+	ID        int `json:"id"`
+	Locations []struct {
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	} `json:"locations"`
+	MainGeneration struct {
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	} `json:"main_generation"`
+	Name  string `json:"name"`
+	Names []struct {
+		Language struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"language"`
+		Name string `json:"name"`
+	} `json:"names"`
+	Pokedexes []struct {
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	} `json:"pokedexes"`
+	VersionGroups []struct {
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	} `json:"version_groups"`
 }
 
 type VersionGroup struct {	//Return struct holding general version data from set-version command
@@ -54,7 +78,8 @@ type VersionGroup struct {	//Return struct holding general version data from set
 	} `json:"versions"`
 }
 
-type ConfigData struct {	//Return struct holding json data returned from http requests for area locations (map/mapb commands) 
+// Command utilizing this struct has been discontinued, might be annoying to remove it
+type ConfigData struct {	//Return struct holding json data returned from http requests for area locations (mapb command) 
 	Count		int		`json:"count"`
 	Next		*string	`json:"next"`
 	Previous	*string	`json:"previous"`
@@ -72,6 +97,33 @@ type LocationAreaDetails struct {	//Return struct holding location area data for
 			URL		string	`json:"url"`
 		}	`json:"pokemon"`
 	}	`json:"pokemon_encounters"`
+}
+
+type LocationDetails struct {	//Return struct holding location data for explore command
+	Areas []struct {
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	} `json:"areas"`
+	GameIndices []struct {
+		GameIndex  int `json:"game_index"`
+		Generation struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"generation"`
+	} `json:"game_indices"`
+	ID    int    `json:"id"`
+	Name  string `json:"name"`
+	Names []struct {
+		Language struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"language"`
+		Name string `json:"name"`
+	} `json:"names"`
+	Region struct {
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	} `json:"region"`
 }
 
 type PokemonDetails struct {	//Return struct holding detailed pokemon data (catch command)
@@ -120,22 +172,4 @@ type EncounterAreas []struct {	//Return struct holding pokemon encounter data (f
 			URL  string `json:"url"`
 		} `json:"version"`
 	} `json:"version_details"`
-}
-
-//Struct methods to allow each response structure to satisfy the APIResponse interface, allowing all structs to be passed into the command functions properly//
-
-func (c *ConfigData) GetName() string {		
-	return ""
-}
-
-func (l *LocationAreaDetails) GetName() string {	
-	return ""
-}
-
-func (p *PokemonDetails) GetName() string {	
-	return ""
-}
-
-func (e *EncounterAreas) GetName() string {
-	return ""
 }

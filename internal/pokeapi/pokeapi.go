@@ -6,6 +6,16 @@ import (
 
 //API call functions, list of functions each making different api requests to PokeAPI. Probably could've used a single function for all calls? Seemed easier to make a new function for each different request.//
 
+func (c *Client) GetRegionData(cache *pokecache.Cache, url string) (RegionData, error) {
+	var regionData RegionData
+	err := requestAndCacheHandling(c, cache, url, &regionData)
+	if err != nil {
+		return regionData, err
+	}
+
+	return regionData, nil
+}
+
 func (c *Client) GetEncounterData(cache *pokecache.Cache, url string) (EncounterAreas, error) {	//Function to retrieve encounter locations for user input pokemon, through find command - version specific, based on user input game version
 	var encounterResults EncounterAreas
 	err := requestAndCacheHandling(c, cache, url, &encounterResults)
@@ -43,7 +53,16 @@ func (c *Client) GetPokemonData(cache *pokecache.Cache, url string) (PokemonDeta
 	return pokemonResults, nil
 }
 
-func (c *Client) GetAreaExplorationData(cache *pokecache.Cache, url string) (LocationAreaDetails, error) {	//Function to return pokemon encounter details through explore command function
+func (c *Client) GetFurtherExplorationData(cache *pokecache.Cache, url string) (LocationDetails, error) {	//Second function for explore command, gets location data instead of locationarea data
+	var locationResults LocationDetails
+	err := requestAndCacheHandling(c, cache, url, &locationResults)
+	if err != nil {
+		return locationResults, err
+	}
+	return locationResults, nil
+}
+
+func (c *Client) GetAreaExplorationData(cache *pokecache.Cache, url string) (LocationAreaDetails, error) {	//Function to return pokemon encounter details through explore command function - handles locationarea details
 	var encounterResults LocationAreaDetails
 	err := requestAndCacheHandling(c, cache, url, &encounterResults)
 	if err != nil {
