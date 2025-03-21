@@ -33,22 +33,27 @@ type RegionData struct {	//Return struct holding region data
 		Name string `json:"name"`
 		URL  string `json:"url"`
 	} `json:"locations"`
-	MainGeneration struct {
-		Name string `json:"name"`
-		URL  string `json:"url"`
-	} `json:"main_generation"`
 	Name  string `json:"name"`
-	Names []struct {
-		Language struct {
-			Name string `json:"name"`
-			URL  string `json:"url"`
-		} `json:"language"`
-		Name string `json:"name"`
-	} `json:"names"`
 	Pokedexes []struct {
 		Name string `json:"name"`
 		URL  string `json:"url"`
 	} `json:"pokedexes"`
+	VersionGroups []struct {
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	} `json:"version_groups"`
+}
+
+type PokedexDetails struct {	//Return struct for pokedex data from pokedex command
+	ID           int    `json:"id"`
+	Name         string `json:"name"`
+	PokemonEntries []struct {
+		EntryNumber    int `json:"entry_number"`
+		PokemonSpecies struct {
+			Name string `json:"name"`
+			URL  string `json:"url"`
+		} `json:"pokemon_species"`
+	} `json:"pokemon_entries"`
 	VersionGroups []struct {
 		Name string `json:"name"`
 		URL  string `json:"url"`
@@ -61,9 +66,7 @@ type VersionGroup struct {	//Return struct holding general version data from set
 		URL  string `json:"url"`
 	} `json:"generation"`
 	ID               int    `json:"id"`
-	MoveLearnMethods []any  `json:"move_learn_methods"`
 	Name             string `json:"name"`
-	Order            int    `json:"order"`
 	Pokedexes        []struct {
 		Name string `json:"name"`
 		URL  string `json:"url"`
@@ -76,17 +79,6 @@ type VersionGroup struct {	//Return struct holding general version data from set
 		Name string `json:"name"`
 		URL  string `json:"url"`
 	} `json:"versions"`
-}
-
-// Command utilizing this struct has been discontinued, might be annoying to remove it
-type ConfigData struct {	//Return struct holding json data returned from http requests for area locations (mapb command) 
-	Count		int		`json:"count"`
-	Next		*string	`json:"next"`
-	Previous	*string	`json:"previous"`
-	Results		[]struct {
-		Name	string `json:"name"`
-		URL		string `json:"url"`
-	}	`json:"results"`
 }
 
 type LocationAreaDetails struct {	//Return struct holding location area data for different encounters (explore command)
@@ -104,22 +96,8 @@ type LocationDetails struct {	//Return struct holding location data for explore 
 		Name string `json:"name"`
 		URL  string `json:"url"`
 	} `json:"areas"`
-	GameIndices []struct {
-		GameIndex  int `json:"game_index"`
-		Generation struct {
-			Name string `json:"name"`
-			URL  string `json:"url"`
-		} `json:"generation"`
-	} `json:"game_indices"`
 	ID    int    `json:"id"`
 	Name  string `json:"name"`
-	Names []struct {
-		Language struct {
-			Name string `json:"name"`
-			URL  string `json:"url"`
-		} `json:"language"`
-		Name string `json:"name"`
-	} `json:"names"`
 	Region struct {
 		Name string `json:"name"`
 		URL  string `json:"url"`

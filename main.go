@@ -9,10 +9,10 @@ import (
 	"github.com/jms-guy/pokedexcli/internal/pokecache"
 )
 
-type PokedexApp struct {		//Encapsulated shared state struct for functional refinement
+type PokedexApp struct {		//Encapsulated shared state struct for functions
 	Client		*pokeapi.Client	//Http Client
 	Cache		*pokecache.Cache	//Data Cache
-	CurrVersion	string
+	CurrVersion	string						//Current version
 	Version		map[string]pokeapi.VersionGroup			//Stores version of Pokedex for further filtering of data
 	UserPokedex	map[string]pokeapi.PokemonDetails	//Pokedex
 }
@@ -27,6 +27,7 @@ func main() {
 	}
 	scanner := bufio.NewScanner(os.Stdin)	//Creates scanner for text input
 
+	fmt.Println(" ********** Welcome! Type 'help' for a list of supported commands. **********")
 	for {
 		fmt.Print("Pokedex > ")
 		scanner.Scan()

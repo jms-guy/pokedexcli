@@ -3,9 +3,15 @@ package main
 import (
 	"strings"
 	"fmt"
+    "golang.org/x/text/cases"
+    "golang.org/x/text/language"
 )
 
 //Helper functions for command functions in commands.go
+
+func capitalizeString(s string) string {    //Simple function to just title-case a string input 'Like This' - all lowercase is kinda ugly.
+    return cases.Title(language.Und, cases.NoLower).String(s)
+}
 
 func cleanInput(s string) []string {	//Cleans user input string for command arguments use
 	lowerS := strings.ToLower(s)
@@ -30,7 +36,7 @@ func extractConditionNames(conditions []any) string {
         if conditionMap, ok := condition.(map[string]any); ok {
             
             if name, exists := conditionMap["name"].(string); exists {
-                conditionNames = append(conditionNames, name) // Add name to the list
+                conditionNames = append(conditionNames, capitalizeString(name)) // Add name to the list
             }
         }
     }

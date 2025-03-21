@@ -6,7 +6,17 @@ import (
 
 //API call functions, list of functions each making different api requests to PokeAPI. Probably could've used a single function for all calls? Seemed easier to make a new function for each different request.//
 
-func (c *Client) GetRegionData(cache *pokecache.Cache, url string) (RegionData, error) {
+func (c *Client) GetPokedexData(cache *pokecache.Cache, url string) (PokedexDetails, error) {
+	var pokedexData PokedexDetails
+	err := requestAndCacheHandling(c, cache, url, &pokedexData)
+	if err != nil {
+		return pokedexData, err
+	}
+
+	return pokedexData, nil
+}
+
+func (c *Client) GetRegionData(cache *pokecache.Cache, url string) (RegionData, error) {	//Function to get region data for use in map command function
 	var regionData RegionData
 	err := requestAndCacheHandling(c, cache, url, &regionData)
 	if err != nil {
@@ -71,16 +81,3 @@ func (c *Client) GetAreaExplorationData(cache *pokecache.Cache, url string) (Loc
 	return encounterResults, nil
 }
 
-func (c *Client) GetLocationAreas(cache *pokecache.Cache, pageURL *string) (ConfigData, error) {	//Function to get area locations through map command functions
-	url := c.baseURL + "/location-area?offset=0&limit=20"
-	if pageURL != nil {
-		url = *pageURL
-	}
-
-	var areaResults ConfigData	
-	err := requestAndCacheHandling(c, cache, url, &areaResults)
-	if err != nil {
-		return areaResults, err
-	}
-	return areaResults, nil
-}
